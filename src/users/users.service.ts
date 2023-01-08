@@ -3,13 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { User, UserDocument } from 'src/schemas/user.schema';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<UserDocument> {
     const isEmailExist = await this.userModel.exists({
       email: createUserDto.email,
     });
@@ -18,8 +17,19 @@ export class UsersService {
       phone: createUserDto.phone,
     });
 
+    const isUsernameExist = await this.userModel.exists({
+      username: createUserDto.username,
+    });
+
     if (isEmailExist) {
       throw new HttpException('Email has already exists', HttpStatus.CONFLICT);
+    }
+
+    if (isUsernameExist) {
+      throw new HttpException(
+        'Username has already exists',
+        HttpStatus.CONFLICT,
+      );
     }
 
     if (isPhoneExist) {
@@ -30,23 +40,30 @@ export class UsersService {
     }
 
     const createdUser = new this.userModel(createUserDto);
-    createdUser.save();
-    console.log(createdUser);
-    return createdUser;
+    return createdUser.save();
   }
 
   async findAll(): Promise<User[]> {
     return this.userModel.find().exec();
   }
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.userModel.findOne({ username: username }).exec();
+  async findOneAndUpdate(
+    username: any,
+    changedUser: any,
+  ): Promise<UserDocument> {
+    return this.userModel.findOneAndUpdate(username, changedUser).exec();
   }
 
-  async delete(id: string) {
-    const deletedUser = await this.userModel
-      .findByIdAndRemove({ _id: id })
-      .exec();
+  async findOne(username: string): Promise<UserDocument | undefined> {
+    return this.userModel.findOne({ username }).exec();
+  }
+
+  async findById(id: string): Promise<UserDocument> {
+    return this.userModel.findById(id);
+  }
+
+  async delete(username) {
+    const deletedUser = await this.userModel.deleteOne({ username }).exec();
     return deletedUser;
   }
 }

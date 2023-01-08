@@ -19,6 +19,9 @@ export class User {
   phone: string;
 
   @Prop()
+  refreshToken: string;
+
+  @Prop()
   roles: Role[];
 }
 

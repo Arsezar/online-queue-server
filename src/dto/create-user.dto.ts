@@ -14,5 +14,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   username: string;
 
+  refreshToken: string;
+
   roles: Role[];
 }

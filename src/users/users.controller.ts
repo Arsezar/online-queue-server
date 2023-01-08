@@ -1,21 +1,26 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { User } from 'src/schemas/user.schema';
-import { Roles } from 'src/decorators/roles.decorator';
-import { Role } from 'src/enums/role.enum';
-import { AuthService } from 'src/auth/auth.service';
+import { AccessTokenGuard } from 'src/auth/guards/accessToken.guard';
+// import { Roles } from 'src/decorators/roles.decorator';
+// import { Role } from 'src/enums/role.enum';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async register(@Body() createUserDto: CreateUserDto) {
-    await this.authService.register(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    await this.usersService.create(createUserDto);
   }
 
   @Get()
@@ -28,6 +33,7 @@ export class UsersController {
     return this.usersService.findOne(username);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return this.usersService.delete(id);

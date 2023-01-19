@@ -1,8 +1,8 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from "class-validator";
 
 export class ResetPasswordDto {
   @IsNotEmpty()
-  pass: string;
+  password: string;
 
   @IsNotEmpty()
   token: string;

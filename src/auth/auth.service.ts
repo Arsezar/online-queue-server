@@ -4,22 +4,22 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-} from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { ConfigService } from '@nestjs/config';
-import { CreateUserDto } from 'src/dto/create-user.dto';
-import { isEmail, isPhoneNumber } from 'class-validator';
-import { AuthDto } from 'src/dto/auth.dto';
-import { ForgotPasswordDto } from 'src/dto/forgot-password.dto';
-import { MailService } from 'src/mail/mail.service';
-import { ResetTokenDto } from 'src/dto/resetToken.dto';
-import { resetToken, ResetTokenDocument } from 'src/schemas/resetToken.schema';
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
-import { v4 as uuid } from 'uuid';
-import { ResetPasswordDto } from 'src/dto/reset-password.dto';
+} from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { ConfigService } from "@nestjs/config";
+import { CreateUserDto } from "src/dto/create-user.dto";
+import { isEmail, isPhoneNumber } from "class-validator";
+import { AuthDto } from "src/dto/auth.dto";
+import { ForgotPasswordDto } from "src/dto/forgot-password.dto";
+import { MailService } from "src/mail/mail.service";
+import { ResetTokenDto } from "src/dto/resetToken.dto";
+import { resetToken, ResetTokenDocument } from "src/schemas/resetToken.schema";
+import { Model } from "mongoose";
+import { InjectModel } from "@nestjs/mongoose";
+import { v4 as uuid } from "uuid";
+import { ResetPasswordDto } from "src/dto/reset-password.dto";
 
 @Injectable()
 export class AuthService {
@@ -29,15 +29,15 @@ export class AuthService {
     private configService: ConfigService,
     private mailService: MailService,
     @InjectModel(resetToken.name)
-    private resetTokenModel: Model<ResetTokenDocument>,
+    private resetTokenModel: Model<ResetTokenDocument>
   ) {}
 
   async signUp(registrationData: CreateUserDto): Promise<any> {
     const userExists = await this.usersService.findOne(
-      registrationData.username,
+      registrationData.username
     );
     if (userExists) {
-      throw new BadRequestException('User already exists');
+      throw new BadRequestException("User already exists");
     }
     const hashedPassword = await bcrypt.hash(registrationData.password, 10);
     try {
@@ -47,12 +47,12 @@ export class AuthService {
       });
       const tokens = await this.getTokens(
         createdUser._id,
-        createdUser.username,
+        createdUser.username
       );
       await this.updateRefreshToken(createdUser._id, createdUser.username);
       return tokens;
     } catch (error) {
-      throw new HttpException('Something went wrong', HttpStatus.BAD_REQUEST);
+      throw new HttpException("Something went wrong", HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -66,8 +66,8 @@ export class AuthService {
       return tokens;
     } catch (error) {
       throw new HttpException(
-        'Wrong credentials provided',
-        HttpStatus.BAD_REQUEST,
+        "Wrong credentials provided",
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -76,9 +76,12 @@ export class AuthService {
     const user = await this.usersService.findByEmail(forgotPasswordDto.email);
     if (!user)
       throw new HttpException(
-        'User with this email doesn`t exist',
-        HttpStatus.BAD_REQUEST,
+        "User with this email doesn`t exist",
+        HttpStatus.BAD_REQUEST
       );
+
+    // TODO: Rewrite resetDate for handling endless + 3 hours to previous Date
+
     const resetDate = new Date(new Date().getTime() + 180 * 60000);
     const resetToken = await this.createResetToken({
       value: uuid(),
@@ -86,14 +89,16 @@ export class AuthService {
       userId: user.id,
     });
     await this.mailService.sendPassReset(user, resetToken.value);
-    return 'email send success';
+    return "email send success";
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
     const resetToken = await this.checkResetToken(resetPasswordDto.token);
-    const user = await this.usersService.findById(resetToken.userId);
-    const newHashedPassword = await bcrypt.hash(resetPasswordDto.pass, 10);
-    await this.usersService.findOneAndUpdate(user, newHashedPassword);
+    const password = await bcrypt.hash(resetPasswordDto.password, 10);
+    await this.usersService.findOneAndUpdate(resetToken.userId, { password });
+    await this.resetTokenModel.findOneAndUpdate(resetToken._id, {
+      expTime: null,
+    });
   }
 
   async logout(userId: any) {
@@ -103,10 +108,9 @@ export class AuthService {
   private async bcryptVerify(plainText: string, hashedData: string) {
     const isPasswordMatching = await bcrypt.compare(plainText, hashedData);
     if (!isPasswordMatching) {
-      console.dir(1);
       throw new HttpException(
-        'Wrong credentials provided',
-        HttpStatus.BAD_REQUEST,
+        "Wrong credentials provided",
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -119,14 +123,13 @@ export class AuthService {
       await this.dataValidation(changedUser);
       await this.usersService.findOneAndUpdate(
         changedUser.username,
-        changedUser,
+        changedUser
       );
       return changedUser;
     } catch (error) {
-      console.dir(2);
       throw new HttpException(
-        'Wrong credentials provided',
-        HttpStatus.BAD_REQUEST,
+        "Wrong credentials provided",
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -136,8 +139,8 @@ export class AuthService {
     const isPhoneValid = isPhoneNumber(user.phone);
     if (!isEmailvalid || !isPhoneValid) {
       throw new HttpException(
-        'Phone or email is invalid',
-        HttpStatus.BAD_REQUEST,
+        "Phone or email is invalid",
+        HttpStatus.BAD_REQUEST
       );
     }
   }
@@ -150,9 +153,9 @@ export class AuthService {
           username,
         },
         {
-          secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
-          expiresIn: '15m',
-        },
+          secret: this.configService.get<string>("JWT_ACCESS_SECRET"),
+          expiresIn: "15m",
+        }
       ),
       this.jwtService.signAsync(
         {
@@ -160,9 +163,9 @@ export class AuthService {
           username,
         },
         {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-          expiresIn: '7d',
-        },
+          secret: this.configService.get<string>("JWT_REFRESH_SECRET"),
+          expiresIn: "7d",
+        }
       ),
     ]);
 
@@ -182,39 +185,44 @@ export class AuthService {
   async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.usersService.findById(userId);
     if (!user || !user.refreshToken)
-      throw new ForbiddenException('Access Denied');
+      throw new ForbiddenException("Access Denied");
     await this.bcryptVerify(user.refreshToken, refreshToken);
     const tokens = await this.getTokens(user.id, user.username);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
     return tokens;
   }
 
-  async createResetToken(resetTokenDto: ResetTokenDto) {
-    const isTokenExists = this.resetTokenModel.exists({
-      value: resetTokenDto.value,
+  async createResetToken(
+    resetTokenDto: ResetTokenDto
+  ): Promise<ResetTokenDocument> {
+    const isTokenExists = await this.resetTokenModel.exists({
+      userId: resetTokenDto.userId,
     });
     if (isTokenExists) {
       const currentResetToken = await this.resetTokenModel
-        .findOne({ value: resetTokenDto.value })
+        .findOne({ userId: resetTokenDto.userId })
         .exec();
-      const token: string = currentResetToken.value;
       const updatedToken = await this.resetTokenModel
-        .findOneAndUpdate({ token }, resetTokenDto)
+        .findOneAndUpdate({ value: currentResetToken.value }, resetTokenDto)
         .exec();
       return updatedToken;
+    } else {
+      const createdResetToken = new this.resetTokenModel(resetTokenDto);
+      return createdResetToken.save();
     }
-    const createdResetToken = new this.resetTokenModel(resetTokenDto);
-    return createdResetToken.save();
   }
 
   async checkResetToken(token: string) {
     const currentResetToken = await this.resetTokenModel
       .findOne({ token })
       .exec();
+    if (currentResetToken.expTime === null) {
+      throw new HttpException("Reset token is expired", HttpStatus.BAD_REQUEST);
+    }
     const currentDate = new Date();
     if (currentDate.getTime() <= currentResetToken.expTime.getTime())
       return currentResetToken;
     else
-      throw new HttpException('ResetToken is invalid', HttpStatus.BAD_REQUEST);
+      throw new HttpException("ResetToken is invalid", HttpStatus.BAD_REQUEST);
   }
 }

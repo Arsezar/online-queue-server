@@ -1,44 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateUserDto } from 'src/dto/create-user.dto';
-import { User, UserDocument } from 'src/schemas/user.schema';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { CreateUserDto } from "src/dto/create-user.dto";
+import { User, UserDocument } from "src/schemas/user.schema";
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDocument> {
-    const isEmailExist = await this.userModel.exists({
-      email: createUserDto.email,
-    });
-
-    const isPhoneExist = await this.userModel.exists({
-      phone: createUserDto.phone,
-    });
-
-    const isUsernameExist = await this.userModel.exists({
-      username: createUserDto.username,
-    });
-
-    if (isEmailExist) {
-      throw new HttpException('Email has already exists', HttpStatus.CONFLICT);
-    }
-
-    if (isUsernameExist) {
-      throw new HttpException(
-        'Username has already exists',
-        HttpStatus.CONFLICT,
-      );
-    }
-
-    if (isPhoneExist) {
-      throw new HttpException(
-        'Phone number has already exists',
-        HttpStatus.CONFLICT,
-      );
-    }
-
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
   }
@@ -49,7 +19,7 @@ export class UsersService {
 
   async findOneAndUpdate(
     username: any,
-    changedUser: any,
+    changedUser: any
   ): Promise<UserDocument> {
     return this.userModel.findOneAndUpdate(username, changedUser).exec();
   }

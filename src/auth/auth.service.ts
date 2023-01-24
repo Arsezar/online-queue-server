@@ -80,7 +80,7 @@ export class AuthService {
         HttpStatus.BAD_REQUEST
       );
 
-    // TODO: Rewrite resetDate for handling endless + 3 hours to previous Date
+    // ! FIXME: Rewrite resetDate for handling endless + 3 hours to previous Date
 
     const resetDate = new Date(new Date().getTime() + 180 * 60000);
     const resetToken = await this.createResetToken({
@@ -122,7 +122,7 @@ export class AuthService {
       changedUser.password = user.password;
       await this.dataValidation(changedUser);
       await this.usersService.findOneAndUpdate(
-        changedUser.username,
+        {username: user.username},
         changedUser
       );
       return changedUser;

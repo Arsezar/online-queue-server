@@ -16,7 +16,7 @@ export class MailService {
   }
 
   async sendPassReset(user: User, token: string) {
-    const url = `${process.env.HOST_URL}/password-reset?token=${token}`;
+    const url = `${process.env.HOST_URL}password-reset?token=${token}`;
     await this.mailerService.sendMail({
       to: user.email,
       from: `"Support Team" <${process.env.MAIL_FROM}>`,
@@ -30,7 +30,7 @@ export class MailService {
   }
 
   async sendConfirmation(user: User, token: string) {
-    const url = `${process.env.HOST_URL}/confirmation?token=${token}`;
+    const url = `${process.env.HOST_URL}confirmation?token=${token}`;
     await this.mailerService.sendMail({
       to: user.email,
       from: `"Support Team" <${process.env.MAIL_FROM}>`,

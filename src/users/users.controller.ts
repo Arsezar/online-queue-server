@@ -11,9 +11,6 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { User } from 'src/schemas/user.schema';
 import { AccessTokenGuard } from 'src/auth/guards/accessToken.guard';
-// import { Roles } from 'src/decorators/roles.decorator';
-// import { Role } from 'src/enums/role.enum';
-
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

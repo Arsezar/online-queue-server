@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, ObjectId } from "mongoose";
 import { CreateUserDto } from "src/dto/create-user.dto";
 import { User, UserDocument } from "src/schemas/user.schema";
 
@@ -28,7 +28,7 @@ export class UsersService {
     return this.userModel.findOne({ username }).exec();
   }
 
-  async findById(id: string): Promise<UserDocument> {
+  async findById(id: ObjectId): Promise<UserDocument> {
     return this.userModel.findById(id);
   }
 

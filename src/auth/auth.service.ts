@@ -16,7 +16,7 @@ import { ForgotPasswordDto } from "src/dto/forgot-password.dto";
 import { MailService } from "src/mail/mail.service";
 import { ResetTokenDto } from "src/dto/resetToken.dto";
 import { resetToken, ResetTokenDocument } from "src/schemas/resetToken.schema";
-import { Model } from "mongoose";
+import { Model, ObjectId } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 import { v4 as uuid } from "uuid";
 import { ResetPasswordDto } from "src/dto/reset-password.dto";
@@ -182,7 +182,7 @@ export class AuthService {
     });
   }
 
-  async refreshTokens(userId: string, refreshToken: string) {
+  async refreshTokens(userId: ObjectId, refreshToken: string) {
     const user = await this.usersService.findById(userId);
     if (!user || !user.refreshToken)
       throw new ForbiddenException("Access Denied");

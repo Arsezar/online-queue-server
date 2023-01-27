@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -33,14 +32,9 @@ export class AuthService {
   ) {}
 
   async signUp(registrationData: CreateUserDto): Promise<any> {
-    const userExists = await this.usersService.findOne(
-      registrationData.username
-    );
-    if (userExists) {
-      throw new BadRequestException("User already exists");
-    }
-    const hashedPassword = await bcrypt.hash(registrationData.password, 10);
+    console.log(registrationData);
     try {
+      const hashedPassword = await bcrypt.hash(registrationData.password, 10);
       const createdUser = await this.usersService.create({
         ...registrationData,
         password: hashedPassword,
@@ -52,7 +46,7 @@ export class AuthService {
       await this.updateRefreshToken(createdUser._id, createdUser.username);
       return tokens;
     } catch (error) {
-      throw new HttpException("Something went wrong", HttpStatus.BAD_REQUEST);
+      throw new HttpException(error.message, 400, { cause: new Error(error) });
     }
   }
 
@@ -122,7 +116,7 @@ export class AuthService {
       changedUser.password = user.password;
       await this.dataValidation(changedUser);
       await this.usersService.findOneAndUpdate(
-        {username: user.username},
+        { username: user.username },
         changedUser
       );
       return changedUser;
@@ -217,7 +211,10 @@ export class AuthService {
       .findOne({ token })
       .exec();
     if (currentResetToken.expTime === null) {
-      throw new HttpException("Reset token is expired", HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        "Reset token was expired",
+        HttpStatus.BAD_REQUEST
+      );
     }
     const currentDate = new Date();
     if (currentDate.getTime() <= currentResetToken.expTime.getTime())

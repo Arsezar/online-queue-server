@@ -1,8 +1,10 @@
-import { IsEmail, IsNotEmpty, IsPhoneNumber } from 'class-validator';
-import { Role } from 'src/enums/role.enum';
+import { Transform } from "class-transformer";
+import { IsEmail, IsNotEmpty, IsPhoneNumber } from "class-validator";
+import { Role } from "src/enums/role.enum";
 
 export class CreateUserDto {
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @IsNotEmpty()

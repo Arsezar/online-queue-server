@@ -4,20 +4,17 @@ import { AuthDto } from "src/dto/auth.dto";
 import { CreateUserDto } from "src/dto/create-user.dto";
 import { ForgotPasswordDto } from "src/dto/forgot-password.dto";
 import { ResetPasswordDto } from "src/dto/reset-password.dto";
-import { MailService } from "src/mail/mail.service";
+import { DataValidationPipe } from "src/pipes/data-validation.pipe";
 import { AuthService } from "./auth.service";
 import { AccessTokenGuard } from "./guards/accessToken.guard";
 import { RefreshTokenGuard } from "./guards/refreshToken.guard";
 
 @Controller("auth")
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private mailService: MailService
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Post("signup")
-  signup(@Body() createUserDto: CreateUserDto) {
+  signup(@Body(DataValidationPipe) createUserDto: CreateUserDto) {
     return this.authService.signUp(createUserDto);
   }
 
@@ -32,7 +29,7 @@ export class AuthController {
     this.authService.logout(req.user["sub"]);
   }
   @Post("change-data")
-  async changeData(@Body() data: CreateUserDto) {
+  async changeData(@Body(DataValidationPipe) data: CreateUserDto) {
     return this.authService.changeUserData(data);
   }
 
@@ -51,7 +48,7 @@ export class AuthController {
   }
 
   @Post("forgot-password")
-  async forgotPassword(@Body() data: ForgotPasswordDto) {
+  async forgotPassword(@Body(DataValidationPipe) data: ForgotPasswordDto) {
     return this.authService.forgotPassword(data);
   }
 

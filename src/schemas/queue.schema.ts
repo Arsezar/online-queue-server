@@ -7,6 +7,9 @@ export type QueueDocument = HydratedDocument<Queue>;
 export class Queue {
   @Prop()
   places: [];
+
+  @Prop()
+  name: string;
 }
 
 export const QueueSchema = SchemaFactory.createForClass(Queue);

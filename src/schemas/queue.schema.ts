@@ -10,6 +10,9 @@ export class Queue {
 
   @Prop()
   name: string;
+
+  @Prop()
+  usersQueue: [];
 }
 
 export const QueueSchema = SchemaFactory.createForClass(Queue);

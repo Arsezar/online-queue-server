@@ -7,6 +7,7 @@ import { AppController } from "./app.controller";
 import { ConfigModule } from "@nestjs/config";
 import { MailModule } from "./mail/mail.module";
 import { QueueModule } from "./queues/queues.module";
+import { RolesModule } from "./roles/roles.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { QueueModule } from "./queues/queues.module";
     AuthModule,
     MailModule,
     QueueModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

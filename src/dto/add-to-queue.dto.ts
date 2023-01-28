@@ -1,6 +1,3 @@
-import { IsNotEmpty } from "class-validator";
+import { QueuePlaceDto } from "./queue-place.dto";
 
-export class AddToQueueDto {
-  @IsNotEmpty()
-  username: string;
-}
+export class AddToQueueDto extends QueuePlaceDto {}

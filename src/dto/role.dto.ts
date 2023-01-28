@@ -1,10 +1,6 @@
 import { IsNotEmpty } from "class-validator";
 
-export class QueueDto {
-  places: [];
-
+export class RoleDto {
   @IsNotEmpty()
   name: string;
-
-  usersQueue: [];
 }

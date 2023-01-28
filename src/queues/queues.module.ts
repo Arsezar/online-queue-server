@@ -4,11 +4,13 @@ import { Queue, QueueSchema } from "src/schemas/queue.schema";
 import { QueueService } from "./queues.service";
 import { QueueController } from "./queues.controller";
 import { UsersModule } from "src/users/users.module";
+import { RolesModule } from "src/roles/roles.module";
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Queue.name, schema: QueueSchema }]),
     UsersModule,
+    RolesModule,
   ],
   providers: [QueueService],
   controllers: [QueueController],

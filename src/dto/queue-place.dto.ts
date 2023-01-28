@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty } from "class-validator";
+import { IsEmail, IsNotEmpty, IsPhoneNumber } from "class-validator";
 import { ObjectId } from "mongoose";
 
 export class QueuePlaceDto {
@@ -12,5 +12,10 @@ export class QueuePlaceDto {
   @IsNotEmpty()
   userId: ObjectId;
 
-  isApproved: boolean;
+  @IsNotEmpty()
+  queueName: string;
+
+  @IsNotEmpty()
+  @IsPhoneNumber()
+  phone: string;
 }

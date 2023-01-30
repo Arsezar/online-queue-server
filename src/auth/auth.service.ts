@@ -19,6 +19,7 @@ import { Model, ObjectId } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 import { v4 as uuid } from "uuid";
 import { ResetPasswordDto } from "src/dto/reset-password.dto";
+import { RolesService } from "src/roles/roles.service";
 
 @Injectable()
 export class AuthService {
@@ -28,11 +29,11 @@ export class AuthService {
     private configService: ConfigService,
     private mailService: MailService,
     @InjectModel(resetToken.name)
-    private resetTokenModel: Model<ResetTokenDocument>
+    private resetTokenModel: Model<ResetTokenDocument>,
+    private rolesService: RolesService
   ) {}
 
   async signUp(registrationData: CreateUserDto): Promise<any> {
-    console.log(registrationData);
     try {
       const hashedPassword = await bcrypt.hash(registrationData.password, 10);
       const createdUser = await this.usersService.create({

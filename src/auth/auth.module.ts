@@ -1,15 +1,16 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LocalStrategy } from './strategies/local.strategy';
-import { UsersModule } from '../users/users.module';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { AccessTokenStrategy } from './strategies/accessToken.strategy';
-import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
-import { AuthController } from './auth.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { resetToken, ResetTokenSchema } from 'src/schemas/resetToken.schema';
-import { MailModule } from 'src/mail/mail.module';
+import { forwardRef, Module } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { LocalStrategy } from "./strategies/local.strategy";
+import { UsersModule } from "../users/users.module";
+import { PassportModule } from "@nestjs/passport";
+import { JwtModule } from "@nestjs/jwt";
+import { AccessTokenStrategy } from "./strategies/accessToken.strategy";
+import { RefreshTokenStrategy } from "./strategies/refreshToken.strategy";
+import { AuthController } from "./auth.controller";
+import { MongooseModule } from "@nestjs/mongoose";
+import { resetToken, ResetTokenSchema } from "src/schemas/resetToken.schema";
+import { MailModule } from "src/mail/mail.module";
+import { RolesModule } from "src/roles/roles.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MailModule } from 'src/mail/mail.module';
     MailModule,
     PassportModule,
     JwtModule.register({}),
+    RolesModule,
   ],
   providers: [
     AuthService,

@@ -18,5 +18,5 @@ export class CreateUserDto {
 
   refreshToken: string;
 
-  roles: Role[];
+  roles: string[];
 }

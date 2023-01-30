@@ -1,6 +1,6 @@
 import { IsNotEmpty } from "class-validator";
 
-export class RoleDto {
+export class RolesDto {
   @IsNotEmpty()
-  name: string;
+  roles: string[];
 }

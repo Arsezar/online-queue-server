@@ -1,21 +1,7 @@
 import { IsEmail, IsNotEmpty, IsPhoneNumber } from "class-validator";
-import { ObjectId } from "mongoose";
+import { CreateUserDto } from "./create-user.dto";
 
-export class QueuePlaceDto {
-  @IsNotEmpty()
-  username: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @IsNotEmpty()
-  userId: ObjectId;
-
+export class QueuePlaceDto extends CreateUserDto {
   @IsNotEmpty()
   queueName: string;
-
-  @IsNotEmpty()
-  @IsPhoneNumber()
-  phone: string;
 }

@@ -36,8 +36,12 @@ export class AuthService {
   async signUp(registrationData: CreateUserDto): Promise<any> {
     try {
       const hashedPassword = await bcrypt.hash(registrationData.password, 10);
+      const userRole = await this.rolesService.findRoles({
+        name: "client",
+      });
       const createdUser = await this.usersService.create({
         ...registrationData,
+        roles: userRole._id.toString(),
         password: hashedPassword,
       });
       const tokens = await this.getTokens(
@@ -49,6 +53,17 @@ export class AuthService {
     } catch (error) {
       throw new HttpException(error.message, 400, { cause: new Error(error) });
     }
+  }
+
+  async employ(username: string) {
+    const user = await this.usersService.findOne(username);
+    const employeeRole = await this.rolesService.findRoles({
+      name: "employee",
+    });
+    const employee = await this.usersService.findOneAndUpdate(user._id, {
+      roles: employeeRole._id,
+    });
+    return employee;
   }
 
   async signIn(authDto: AuthDto) {
@@ -198,7 +213,7 @@ export class AuthService {
         .findOne({ userId: resetTokenDto.userId })
         .exec();
       const updatedToken = await this.resetTokenModel
-        .findOneAndUpdate({ value: currentResetToken.value }, resetTokenDto)
+        .findOneAndReplace({ value: currentResetToken.value }, resetTokenDto)
         .exec();
       return updatedToken;
     } else {

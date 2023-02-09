@@ -1,6 +1,5 @@
-import { Transform } from "class-transformer";
 import { IsEmail, IsNotEmpty, IsPhoneNumber } from "class-validator";
-import { Role } from "src/enums/role.enum";
+import { ObjectId } from "mongoose";
 
 export class CreateUserDto {
   @IsEmail()
@@ -18,5 +17,5 @@ export class CreateUserDto {
 
   refreshToken: string;
 
-  roles: string[];
+  roles: string;
 }

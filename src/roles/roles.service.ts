@@ -35,26 +35,31 @@ export class RolesService {
     if (isRolesExists.length === 3 && allRoles.length === 3) return;
     const roles = [
       { name: "admin", permissions: "all" },
-      { name: "user", permissions: "all" },
+      { name: "client", permissions: "all" },
       { name: "employee", permissions: "all" },
     ];
     this.rolesModel.insertMany(roles);
   }
 
-  async signRoles(rolesDto: RolesDto) {
-    const allRoles = await this.rolesModel.find();
-    if (!allRoles)
-      throw new HttpException(
-        "Role with this name doesn`t exist",
-        HttpStatus.BAD_REQUEST
-      );
-    const isRolesExists = allRoles?.filter(
-      (role) =>
-        role.name === "admin" ||
-        role.name === "user" ||
-        role.name === "employee"
-    );
-    return [];
+  // async signRoles(rolesDto: RolesDto) {
+  //   const allRoles = await this.rolesModel.find();
+  //   if (!allRoles)
+  //     throw new HttpException(
+  //       "Role with this name doesn`t exist",
+  //       HttpStatus.BAD_REQUEST
+  //     );
+  //   const isRolesExists = allRoles?.filter(
+  //     (role) =>
+  //       role.name === "admin" ||
+  //       role.name === "user" ||
+  // role.name === "employee"
+  //   );
+  //   return [];
+  // }
+
+  async findRoles(rolesDto: RolesDto) {
+    const role = await this.rolesModel.findOne({ name: rolesDto.name });
+    return role;
   }
 
   async isObjectIdValid(id: string) {

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Post, Req } from "@nestjs/common";
 import { AddToQueueDto } from "src/dto/add-to-queue.dto";
 import { QueuePlaceDto } from "src/dto/queue-place.dto";
 import { QueueDto } from "src/dto/queue.dto";
@@ -22,6 +22,11 @@ export class QueueController {
   @Post("create-place")
   async createPlace(@Body(DataValidationPipe) queuePlaceDto: QueuePlaceDto) {
     return this.queueService.createPlace(queuePlaceDto);
+  }
+
+  @Get("get-queues")
+  async getQueues() {
+    return this.queueService.getAllQueues();
   }
 
   @Delete("remove-place")

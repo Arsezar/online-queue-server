@@ -21,7 +21,7 @@ export class RolesService {
     const isRolesExists = allRoles?.filter(
       (role) =>
         role.name === "admin" ||
-        role.name === "user" ||
+        role.name === "client" ||
         role.name === "employee"
     );
     allRoles?.forEach((role) => {

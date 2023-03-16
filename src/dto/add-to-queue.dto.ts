@@ -5,5 +5,5 @@ export class AddToQueueDto {
   username: string;
 
   @IsNotEmpty()
-  queueName: string;
+  queue: string;
 }

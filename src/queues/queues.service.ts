@@ -5,13 +5,14 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, ObjectId } from "mongoose";
 import { AuthService } from "src/auth/auth.service";
 import { AddToQueueDto } from "src/dto/add-to-queue.dto";
 import { QueuePlaceDto } from "src/dto/queue-place.dto";
 import { QueueDto } from "src/dto/queue.dto";
 import { Queue, QueueDocument } from "src/schemas/queue.schema";
 import { UsersService } from "src/users/users.service";
+import { v4 as uuid } from "uuid";
 
 interface Place extends QueueUser {}
 
@@ -22,6 +23,11 @@ interface QueueUser {
   queue: string;
   phone: string;
   roles: string;
+  cancelled: boolean;
+  approved: boolean;
+  processed: boolean;
+  key: string;
+  appointment: Date | null;
 }
 @Injectable()
 export class QueueService {
@@ -45,6 +51,11 @@ export class QueueService {
       userId: user._id.toString(),
       queue: queue._id.toString(),
       roles: user.roles,
+      cancelled: user.cancelled,
+      approved: user.approved,
+      processed: user.processed,
+      key: user.key,
+      appointment: user.appointment,
     };
     console.log(queueUser);
     const queueUsers: QueueUser[] = queue.usersQueue;
@@ -78,10 +89,10 @@ export class QueueService {
     const queue = await this.queueModel.findById(queuePlaceDto.queue).exec();
     if (!queue)
       throw new HttpException(
-        "Queue with this name doesn`t exist",
+        "Queue with this id doesn`t exist",
         HttpStatus.BAD_REQUEST
       );
-    // TODO: PLACE IS RIGHTFUL USER SO WE CAN USE CREATE METHOD FROM USERSSEVICE AND CHECK IT BY SIGNUP METHOD
+    // * ATTENTION: PLACE IS RIGHTFUL USER SO WE CAN USE CREATE METHOD FROM USERSSEVICE AND CHECK IT BY SIGNUP METHOD
     await this.authService.signUp({
       username: queuePlaceDto.username,
       email: queuePlaceDto.email,
@@ -89,6 +100,10 @@ export class QueueService {
       roles: queuePlaceDto.roles,
       password: queuePlaceDto.password,
       refreshToken: null,
+      cancelled: false,
+      approved: false,
+      processed: false,
+      key: uuid(),
     });
     const employee = await this.authService.employ(queuePlaceDto.username);
     const place: Place = {
@@ -98,6 +113,11 @@ export class QueueService {
       queue: queue._id.toString(),
       userId: employee._id.toString(),
       roles: employee.roles,
+      cancelled: employee.cancelled,
+      approved: employee.approved,
+      processed: employee.processed,
+      key: employee.key,
+      appointment: employee.appointment,
     };
     place.queue = queue._id.toString();
     const places: Place[] = queue.places;
@@ -124,5 +144,9 @@ export class QueueService {
   async getAllQueues() {
     const queues = await this.queueModel.find();
     return queues;
+  }
+
+  async findById(id: string): Promise<QueueDocument> {
+    return this.queueModel.findById(id);
   }
 }

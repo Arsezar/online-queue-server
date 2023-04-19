@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, ObjectId } from "mongoose";
 import { CreateUserDto } from "src/dto/create-user.dto";
 import { User, UserDocument } from "src/schemas/user.schema";
+import { v4 as uuid } from "uuid";
 
 @Injectable()
 export class UsersService {
@@ -34,7 +35,14 @@ export class UsersService {
     if (isUsernameExists) {
       throw new BadRequestException("User with this username already exists");
     }
-    const createdUser = new this.userModel(createUserDto);
+    const createdUser = new this.userModel({
+      ...createUserDto,
+      cancelled: false,
+      approved: false,
+      processed: false,
+      key: uuid(),
+      appointment: null,
+    });
     return createdUser.save();
   }
 

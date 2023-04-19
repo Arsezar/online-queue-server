@@ -22,6 +22,21 @@ export class User {
 
   @Prop()
   roles: string;
+
+  @Prop()
+  cancelled: boolean;
+
+  @Prop()
+  approved: boolean;
+
+  @Prop()
+  processed: boolean;
+
+  @Prop()
+  key: string;
+
+  @Prop()
+  appointment: Date | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

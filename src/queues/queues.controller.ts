@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Post, Req } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Req,
+} from "@nestjs/common";
 import { AddToQueueDto } from "src/dto/add-to-queue.dto";
 import { QueuePlaceDto } from "src/dto/queue-place.dto";
 import { QueueDto } from "src/dto/queue.dto";
@@ -27,6 +35,12 @@ export class QueueController {
   @Get("get-queues")
   async getQueues() {
     return this.queueService.getAllQueues();
+  }
+
+  @Get(":id")
+  async findById(@Param("id") id: string) {
+    const findedQueue = await this.queueService.findById(id);
+    return findedQueue;
   }
 
   @Delete("remove-place")

@@ -5,68 +5,118 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, ObjectId } from "mongoose";
+import { Model } from "mongoose";
 import { AuthService } from "src/auth/auth.service";
-import { AddToQueueDto } from "src/dto/add-to-queue.dto";
+import { AddClientToQueueDto } from "src/dto/add-client-to-queue.dto";
+import { AddPlaceToQueue } from "src/dto/add-place-to-queue.dto";
 import { QueuePlaceDto } from "src/dto/queue-place.dto";
 import { QueueDto } from "src/dto/queue.dto";
+import { UserDeleteDto } from "src/dto/user-delete.dto";
+import { RolesService } from "src/roles/roles.service";
 import { Queue, QueueDocument } from "src/schemas/queue.schema";
 import { UsersService } from "src/users/users.service";
 import { v4 as uuid } from "uuid";
 
-interface Place extends QueueUser {}
-
-interface QueueUser {
-  userId: string;
+interface Place {
   username: string;
   email: string;
-  queue: string;
   phone: string;
+  userId: string;
+  queueId: string;
   roles: string;
+  key: string;
+}
+
+interface Appointment {
+  place: string;
+  time: Date;
+}
+
+interface Client extends Place {
   cancelled: boolean;
   approved: boolean;
   processed: boolean;
-  key: string;
-  appointment: Date | null;
+  appointment: Appointment | null;
 }
 @Injectable()
 export class QueueService {
   constructor(
     @InjectModel(Queue.name) private queueModel: Model<QueueDocument>,
     private userService: UsersService,
-    private authService: AuthService
+    private authService: AuthService,
+    private rolesService: RolesService
   ) {}
 
-  async addToQueue(addToQueueDto: AddToQueueDto) {
-    const user = await this.userService.findOne(addToQueueDto.username);
-    const queue = await this.queueModel.findById(addToQueueDto.queue).exec();
+  async addClientToQueue(addClientToQueueDto: AddClientToQueueDto) {
+    const user = await this.userService.findOne(addClientToQueueDto.username);
+    const queue = await this.queueModel
+      .findById(addClientToQueueDto.queueId)
+      .exec();
     if (!user || !queue) {
-      throw new ForbiddenException("Queue or User isn`t exists");
+      throw new ForbiddenException("Queue or Client isn`t exists");
     }
-    // TODO: MAKE CHECK FOR REQUIRED ROLE (USER/CLIENT)
-    const queueUser: QueueUser = {
+    // TODO: MAKE CHECK FOR APPOINTMENT DATA (PLACE EXISTEMENT AND DATE CORRECTNESS)
+    const client: Client = {
       username: user.username,
       email: user.email,
       phone: user.phone,
       userId: user._id.toString(),
-      queue: queue._id.toString(),
+      queueId: queue._id.toString(),
       roles: user.roles,
       cancelled: user.cancelled,
       approved: user.approved,
       processed: user.processed,
       key: user.key,
-      appointment: user.appointment,
+      appointment: {
+        time: addClientToQueueDto.appointment.time,
+        place: addClientToQueueDto.appointment.place,
+      },
     };
-    console.log(queueUser);
-    const queueUsers: QueueUser[] = queue.usersQueue;
+    console.log(client);
+    const clients: Client[] = queue.clients;
     this.isUserOrPlaceExists(
-      queueUsers,
-      queueUser,
+      clients,
+      client,
       "This user already exists in this queue"
     );
-    queueUsers.push(queueUser);
+    clients.push(client);
     const updatedQueue = await this.queueModel.findByIdAndUpdate(queue._id, {
-      usersQueue: [...queueUsers],
+      clients: [...clients],
+    });
+    return updatedQueue;
+  }
+
+  async addPlaceToQueue(addPlaceToQueue: AddPlaceToQueue) {
+    const user = await this.userService.findOne(addPlaceToQueue.place);
+    const userRole = await this.rolesService.findById(addPlaceToQueue.queueId);
+    if (userRole.name !== "employee") {
+      throw new ForbiddenException("This user is not an employee");
+    }
+    const queue = await this.queueModel
+      .findById(addPlaceToQueue.queueId)
+      .exec();
+    if (!user || !queue) {
+      throw new ForbiddenException("Queue or Place isn`t exists");
+    }
+    const place: Place = {
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      userId: user._id.toString(),
+      queueId: queue._id.toString(),
+      roles: user.roles,
+      key: user.key,
+    };
+    console.log(place);
+    const places: Place[] = queue.clients;
+    this.isUserOrPlaceExists(
+      places,
+      place,
+      "This user already exists in this queue"
+    );
+    places.push(place);
+    const updatedQueue = await this.queueModel.findByIdAndUpdate(queue._id, {
+      places: [...places],
     });
     return updatedQueue;
   }
@@ -86,7 +136,7 @@ export class QueueService {
   }
 
   async createPlace(queuePlaceDto: QueuePlaceDto) {
-    const queue = await this.queueModel.findById(queuePlaceDto.queue).exec();
+    const queue = await this.queueModel.findById(queuePlaceDto.queueId).exec();
     if (!queue)
       throw new HttpException(
         "Queue with this id doesn`t exist",
@@ -110,16 +160,12 @@ export class QueueService {
       username: employee.username,
       email: employee.email,
       phone: employee.phone,
-      queue: queue._id.toString(),
+      queueId: queue._id.toString(),
       userId: employee._id.toString(),
       roles: employee.roles,
-      cancelled: employee.cancelled,
-      approved: employee.approved,
-      processed: employee.processed,
       key: employee.key,
-      appointment: employee.appointment,
     };
-    place.queue = queue._id.toString();
+    place.queueId = queue._id.toString();
     const places: Place[] = queue.places;
     this.isUserOrPlaceExists(places, place, "This place already exists");
     places.push(place);
@@ -147,6 +193,60 @@ export class QueueService {
   }
 
   async findById(id: string): Promise<QueueDocument> {
-    return this.queueModel.findById(id);
+    return await this.queueModel.findById(id).exec();
+  }
+
+  // TODO: DEVELOP CORRECT CLEAR OF ALL QUEUE DATA FROM CLIENTS AND PLACES
+  async deleteQueue(id: string) {
+    return await this.queueModel.findByIdAndDelete(id).exec();
+  }
+
+  async deletePlace(userDeleteDto: UserDeleteDto) {
+    console.log(userDeleteDto.queueId);
+    // try {
+    const queue = await this.queueModel.findById(userDeleteDto.queueId).exec();
+    console.dir(queue);
+    const places = queue.places;
+    console.dir(places);
+    const index = places.findIndex(
+      (place) => place["userId"] === userDeleteDto.userId
+    );
+    if (index === -1) {
+      throw new ForbiddenException("Place is not exist");
+    }
+    places.splice(index, 1);
+    console.log(places);
+    const updatedQueue = await this.queueModel.findByIdAndUpdate(queue._id, {
+      places: [...places],
+    });
+    return updatedQueue;
+    // } catch (error) {
+    // console.dir(error);
+    throw new ForbiddenException("Wrong credentials provided");
+    // }
+  }
+
+  async deleteClient(userDeleteDto: UserDeleteDto) {
+    try {
+      const queue = await this.queueModel
+        .findById(userDeleteDto.queueId)
+        .exec();
+      console.log(queue);
+      const clients = queue.clients;
+      const index = clients.findIndex(
+        (client) => client["userId"] === userDeleteDto.userId
+      );
+      if (index === -1) {
+        throw new ForbiddenException("Client is not exist");
+      }
+      clients.splice(index, 1);
+      console.log(clients);
+      const updatedQueue = await this.queueModel.findByIdAndUpdate(queue._id, {
+        clients: [...clients],
+      });
+      return updatedQueue;
+    } catch (error) {
+      throw new ForbiddenException("Wrong credentials provided");
+    }
   }
 }

@@ -12,7 +12,7 @@ export class Queue {
   name: string;
 
   @Prop()
-  usersQueue: [];
+  clients: [];
 }
 
 export const QueueSchema = SchemaFactory.createForClass(Queue);

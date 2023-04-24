@@ -3,5 +3,5 @@ import { CreateUserDto } from "./create-user.dto";
 
 export class QueuePlaceDto extends CreateUserDto {
   @IsNotEmpty()
-  queue: string;
+  queueId: string;
 }

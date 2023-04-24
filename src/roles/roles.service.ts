@@ -62,6 +62,10 @@ export class RolesService {
     return role;
   }
 
+  async findById(id: string) {
+    return this.rolesModel.findById(id);
+  }
+
   async isObjectIdValid(id: string) {
     if (isValidObjectId(id)) {
       if (String(new mongoose.Types.ObjectId(id)) === id) {

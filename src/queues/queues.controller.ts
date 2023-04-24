@@ -4,22 +4,35 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
 } from "@nestjs/common";
-import { AddToQueueDto } from "src/dto/add-to-queue.dto";
+import { AddClientToQueueDto } from "src/dto/add-client-to-queue.dto";
 import { QueuePlaceDto } from "src/dto/queue-place.dto";
 import { QueueDto } from "src/dto/queue.dto";
 import { DataValidationPipe } from "src/pipes/data-validation.pipe";
 import { QueueService } from "./queues.service";
+import { UserDeleteDto } from "src/dto/user-delete.dto";
+import { QueueDeleteDto } from "src/dto/queue-delete.dto";
+import { AddPlaceToQueue } from "src/dto/add-place-to-queue.dto";
 
 @Controller("queues")
 export class QueueController {
   constructor(private readonly queueService: QueueService) {}
 
-  @Post("add-user")
-  async addToQueue(@Body(DataValidationPipe) addToQueueDto: AddToQueueDto) {
-    await this.queueService.addToQueue(addToQueueDto);
+  @Post("add-client")
+  async addClientToQueue(
+    @Body(DataValidationPipe) addClientToQueueDto: AddClientToQueueDto
+  ) {
+    await this.queueService.addClientToQueue(addClientToQueueDto);
+  }
+
+  @Post("add-client")
+  async addPlaceToQueue(
+    @Body(DataValidationPipe) addPlaceToQueueDto: AddPlaceToQueue
+  ) {
+    await this.queueService.addPlaceToQueue(addPlaceToQueueDto);
   }
 
   @Post("create-queue")
@@ -43,9 +56,18 @@ export class QueueController {
     return findedQueue;
   }
 
-  @Delete("remove-place")
-  async removePlace() {}
+  @Patch("delete-place")
+  async removePlace(@Body(DataValidationPipe) userDeleteDto: UserDeleteDto) {
+    return this.queueService.deletePlace(userDeleteDto);
+  }
 
-  @Delete("remove-user")
-  async removeUser() {}
+  @Patch("delete-client")
+  async removeClient(@Body(DataValidationPipe) userDeleteDto: UserDeleteDto) {
+    return this.queueService.deleteClient(userDeleteDto);
+  }
+
+  @Patch("delete-queue")
+  async removeQueue(@Body(DataValidationPipe) queueDeleteDto: QueueDeleteDto) {
+    return this.queueService.deleteQueue(queueDeleteDto.queueId);
+  }
 }

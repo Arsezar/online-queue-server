@@ -1,9 +1,9 @@
 import { IsNotEmpty } from "class-validator";
 
-export class AddToQueueDto {
+export class UserDeleteDto {
   @IsNotEmpty()
-  username: string;
+  queueId: string;
 
   @IsNotEmpty()
-  queue: string;
+  userId: string;
 }

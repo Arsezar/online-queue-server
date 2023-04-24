@@ -1,7 +1,12 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument, ObjectId } from "mongoose";
+import { HydratedDocument } from "mongoose";
 
 export type UserDocument = HydratedDocument<User>;
+
+interface Appointment {
+  place: string;
+  time: Date;
+}
 
 @Schema()
 export class User {
@@ -35,8 +40,13 @@ export class User {
   @Prop()
   key: string;
 
-  @Prop()
-  appointment: Date | null;
+  @Prop({
+    type: {
+      place: String,
+      time: Date,
+    },
+  })
+  appointment: Appointment;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

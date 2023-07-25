@@ -4,7 +4,7 @@ import { AuthDto } from "src/dto/auth.dto";
 import { CreateUserDto } from "src/dto/create-user.dto";
 import { ForgotPasswordDto } from "src/dto/forgot-password.dto";
 import { ResetPasswordDto } from "src/dto/reset-password.dto";
-import { DataValidationPipe } from "src/pipes/data-validation.pipe";
+import { DataValidationPipe } from "src/pipes/data-transformation.pipe";
 import { AuthService } from "./auth.service";
 import { AccessTokenGuard } from "./guards/accessToken.guard";
 import { RefreshTokenGuard } from "./guards/refreshToken.guard";

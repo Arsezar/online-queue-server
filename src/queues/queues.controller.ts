@@ -11,7 +11,7 @@ import {
 import { AddClientToQueueDto } from "src/dto/add-client-to-queue.dto";
 import { QueuePlaceDto } from "src/dto/queue-place.dto";
 import { QueueDto } from "src/dto/queue.dto";
-import { DataValidationPipe } from "src/pipes/data-validation.pipe";
+import { DataValidationPipe } from "src/pipes/data-transformation.pipe";
 import { QueueService } from "./queues.service";
 import { UserDeleteDto } from "src/dto/user-delete.dto";
 import { QueueDeleteDto } from "src/dto/queue-delete.dto";
@@ -28,7 +28,7 @@ export class QueueController {
     await this.queueService.addClientToQueue(addClientToQueueDto);
   }
 
-  @Post("add-client")
+  @Post("add-place")
   async addPlaceToQueue(
     @Body(DataValidationPipe) addPlaceToQueueDto: AddPlaceToQueue
   ) {

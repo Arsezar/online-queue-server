@@ -72,9 +72,8 @@ export class QueueService {
         place: addClientToQueueDto.appointment.place,
       },
     };
-    console.log(client);
     const clients: Client[] = queue.clients;
-    this.isUserOrPlaceExists(
+    this.isClientOrPlaceExists(
       clients,
       client,
       "This user already exists in this queue"
@@ -87,16 +86,16 @@ export class QueueService {
   }
 
   async addPlaceToQueue(addPlaceToQueue: AddPlaceToQueue) {
-    const user = await this.userService.findOne(addPlaceToQueue.place);
-    const userRole = await this.rolesService.findById(addPlaceToQueue.queueId);
-    if (userRole.name !== "employee") {
-      throw new ForbiddenException("This user is not an employee");
-    }
+    const user = await this.userService.findOne(addPlaceToQueue.username);
     const queue = await this.queueModel
       .findById(addPlaceToQueue.queueId)
       .exec();
     if (!user || !queue) {
       throw new ForbiddenException("Queue or Place isn`t exists");
+    }
+    const userRole = await this.rolesService.findById(user.roles);
+    if (userRole.name !== "employee") {
+      throw new ForbiddenException("This user is not an employee");
     }
     const place: Place = {
       username: user.username,
@@ -107,9 +106,8 @@ export class QueueService {
       roles: user.roles,
       key: user.key,
     };
-    console.log(place);
-    const places: Place[] = queue.clients;
-    this.isUserOrPlaceExists(
+    const places: Place[] = queue.places;
+    this.isClientOrPlaceExists(
       places,
       place,
       "This user already exists in this queue"
@@ -167,7 +165,7 @@ export class QueueService {
     };
     place.queueId = queue._id.toString();
     const places: Place[] = queue.places;
-    this.isUserOrPlaceExists(places, place, "This place already exists");
+    this.isClientOrPlaceExists(places, place, "This place already exists");
     places.push(place);
     const updatedQueue = await this.queueModel.findByIdAndUpdate(queue._id, {
       places: [...places],
@@ -175,7 +173,7 @@ export class QueueService {
     return updatedQueue;
   }
 
-  isUserOrPlaceExists(array: any[], object: any, message: string) {
+  isClientOrPlaceExists(array: any[], object: any, message: string) {
     array.forEach((placeObject) => {
       if (
         placeObject.email === object.email ||
@@ -202,28 +200,26 @@ export class QueueService {
   }
 
   async deletePlace(userDeleteDto: UserDeleteDto) {
-    console.log(userDeleteDto.queueId);
-    // try {
-    const queue = await this.queueModel.findById(userDeleteDto.queueId).exec();
-    console.dir(queue);
-    const places = queue.places;
-    console.dir(places);
-    const index = places.findIndex(
-      (place) => place["userId"] === userDeleteDto.userId
-    );
-    if (index === -1) {
-      throw new ForbiddenException("Place is not exist");
+    try {
+      const queue = await this.queueModel
+        .findById(userDeleteDto.queueId)
+        .exec();
+      const places = queue.places;
+      const index = places.findIndex(
+        (place) => place["userId"] === userDeleteDto.userId
+      );
+      if (index === -1) {
+        throw new ForbiddenException("Place is not exist");
+      }
+      places.splice(index, 1);
+      const updatedQueue = await this.queueModel.findByIdAndUpdate(queue._id, {
+        places: [...places],
+      });
+      return updatedQueue;
+    } catch (error) {
+      console.dir(error);
+      throw new ForbiddenException("Wrong credentials provided");
     }
-    places.splice(index, 1);
-    console.log(places);
-    const updatedQueue = await this.queueModel.findByIdAndUpdate(queue._id, {
-      places: [...places],
-    });
-    return updatedQueue;
-    // } catch (error) {
-    // console.dir(error);
-    throw new ForbiddenException("Wrong credentials provided");
-    // }
   }
 
   async deleteClient(userDeleteDto: UserDeleteDto) {
@@ -231,7 +227,6 @@ export class QueueService {
       const queue = await this.queueModel
         .findById(userDeleteDto.queueId)
         .exec();
-      console.log(queue);
       const clients = queue.clients;
       const index = clients.findIndex(
         (client) => client["userId"] === userDeleteDto.userId
@@ -240,7 +235,6 @@ export class QueueService {
         throw new ForbiddenException("Client is not exist");
       }
       clients.splice(index, 1);
-      console.log(clients);
       const updatedQueue = await this.queueModel.findByIdAndUpdate(queue._id, {
         clients: [...clients],
       });

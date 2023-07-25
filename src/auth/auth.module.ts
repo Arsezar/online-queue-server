@@ -8,20 +8,22 @@ import { AccessTokenStrategy } from "./strategies/accessToken.strategy";
 import { RefreshTokenStrategy } from "./strategies/refreshToken.strategy";
 import { AuthController } from "./auth.controller";
 import { MongooseModule } from "@nestjs/mongoose";
-import { resetToken, ResetTokenSchema } from "src/schemas/resetToken.schema";
+import { ResetToken, ResetTokenSchema } from "src/schemas/resetToken.schema";
 import { MailModule } from "src/mail/mail.module";
 import { RolesModule } from "src/roles/roles.module";
+import { TimetablesModule } from "src/timetables/timetables.module";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: resetToken.name, schema: ResetTokenSchema },
+      { name: ResetToken.name, schema: ResetTokenSchema },
     ]),
     forwardRef(() => UsersModule),
     MailModule,
     PassportModule,
     JwtModule.register({}),
     RolesModule,
+    TimetablesModule,
   ],
   providers: [
     AuthService,

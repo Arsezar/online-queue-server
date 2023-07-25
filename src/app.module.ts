@@ -8,10 +8,14 @@ import { ConfigModule } from "@nestjs/config";
 import { MailModule } from "./mail/mail.module";
 import { QueueModule } from "./queues/queues.module";
 import { RolesModule } from "./roles/roles.module";
+import { TimetablesModule } from "./timetables/timetables.module";
+import { TimetablesController } from "./timetables/timetables.controller";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     MongooseModule,
     MongooseModule.forRoot(process.env.MONGO_URI),
     UsersModule,
@@ -19,6 +23,7 @@ import { RolesModule } from "./roles/roles.module";
     MailModule,
     QueueModule,
     RolesModule,
+    TimetablesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

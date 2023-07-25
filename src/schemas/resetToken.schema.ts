@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 
-export type ResetTokenDocument = HydratedDocument<resetToken>;
+export type ResetTokenDocument = HydratedDocument<ResetToken>;
 
 @Schema()
-export class resetToken {
+export class ResetToken {
   @Prop()
   value: string;
 
@@ -15,4 +15,4 @@ export class resetToken {
   userId: string;
 }
 
-export const ResetTokenSchema = SchemaFactory.createForClass(resetToken);
+export const ResetTokenSchema = SchemaFactory.createForClass(ResetToken);

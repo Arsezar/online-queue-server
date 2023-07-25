@@ -2,7 +2,7 @@ import { IsNotEmpty } from "class-validator";
 
 export class AddPlaceToQueue {
   @IsNotEmpty()
-  place: string;
+  username: string;
 
   @IsNotEmpty()
   queueId: string;

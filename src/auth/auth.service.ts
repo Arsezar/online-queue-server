@@ -14,12 +14,13 @@ import { AuthDto } from "src/dto/auth.dto";
 import { ForgotPasswordDto } from "src/dto/forgot-password.dto";
 import { MailService } from "src/mail/mail.service";
 import { ResetTokenDto } from "src/dto/resetToken.dto";
-import { resetToken, ResetTokenDocument } from "src/schemas/resetToken.schema";
+import { ResetToken, ResetTokenDocument } from "src/schemas/resetToken.schema";
 import { Model, ObjectId } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
 import { v4 as uuid } from "uuid";
 import { ResetPasswordDto } from "src/dto/reset-password.dto";
 import { RolesService } from "src/roles/roles.service";
+import { TimetablesService } from "src/timetables/timetables.service";
 
 @Injectable()
 export class AuthService {
@@ -28,9 +29,10 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailService: MailService,
-    @InjectModel(resetToken.name)
+    @InjectModel(ResetToken.name)
     private resetTokenModel: Model<ResetTokenDocument>,
-    private rolesService: RolesService
+    private rolesService: RolesService,
+    private timetableService: TimetablesService
   ) {}
 
   async signUp(registrationData: CreateUserDto): Promise<any> {
@@ -62,6 +64,10 @@ export class AuthService {
     });
     const employee = await this.usersService.findOneAndUpdate(user._id, {
       roles: employeeRole._id,
+    });
+    await this.timetableService.create({
+      placeId: user._id.toString(),
+      schedule: ["12:00", "13:00", "15:00"],
     });
     return employee;
   }
